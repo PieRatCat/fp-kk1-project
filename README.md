@@ -1,0 +1,1 @@
+Placeholder readme for a project that involves creating a python script that runs on a schedule, fetches data from API, and stores them in a SQL table.
