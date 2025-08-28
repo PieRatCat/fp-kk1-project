@@ -1,0 +1,15 @@
+2025-08-28 21:08:04,761 - INFO - Database setup complete.
+2025-08-28 21:08:05,003 - INFO - Successfully fetched weather data for Helsingborg,SE.
+2025-08-28 21:08:05,052 - INFO - Data inserted successfully.
+2025-08-28 21:58:38,273 - INFO - Database setup complete.
+2025-08-28 21:58:38,427 - INFO - Successfully fetched weather data for Helsingborg,SE.
+2025-08-28 21:58:38,433 - ERROR - Error inserting data: NOT NULL constraint failed: hbg_weather.humidity
+2025-08-28 21:59:03,559 - INFO - Database setup complete.
+2025-08-28 21:59:03,685 - INFO - Successfully fetched weather data for Helsingborg,SE.
+2025-08-28 21:59:03,736 - INFO - Data inserted successfully.
+2025-08-28 22:10:03,406 - INFO - Database setup complete.
+2025-08-28 22:10:03,578 - INFO - Successfully fetched weather data for Helsingborg,SE.
+2025-08-28 22:10:03,643 - INFO - Data inserted successfully.
+2025-08-28 23:10:03,930 - INFO - Database setup complete.
+2025-08-28 23:10:04,078 - INFO - Successfully fetched weather data for Helsingborg,SE.
+2025-08-28 23:10:04,131 - INFO - Data inserted successfully.
