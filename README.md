@@ -1,6 +1,6 @@
 # Weather Data Collector
 
-This project is a Python script that fetches weather data from the OpenWeatherMap (OWM) API, stores it in a SQLite database, and is scheduled to run automatically.
+This project is a Python script that fetches weather data from the OpenWeatherMap (OWM) API using the [pyowm](https://github.com/csparpa/pyowm) library, stores it in a SQLite database, and is scheduled to run automatically.
 
 ## Features
 
@@ -73,6 +73,102 @@ python main.py
 ```
 
 This will fetch the latest weather data for Helsingborg, SE, and store it in the `weatherdata.db` database.
+
+## How It Works
+
+The `main.py` script is responsible for the core logic of the application. Here's a breakdown of its key components:
+
+### 1. Database Setup
+The `setup_database()` function initializes the SQLite database and creates the `hbg_weather` table if it doesn't already exist.
+
+```python
+def setup_database(db_file=DB_FILE):
+    """Create the database and table if they don't exist."""
+    conn = sqlite3.connect(db_file)
+    cursor = conn.cursor()
+    
+    sql_create_table ='''
+        CREATE TABLE IF NOT EXISTS hbg_weather (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT NOT NULL,
+            status TEXT NOT NULL,
+            temperature REAL NOT NULL
+        );
+    '''
+    cursor.execute(sql_create_table)
+    
+    # Commit the changes and close the connection
+    conn.commit()
+    conn.close()
+    logging.info("Database setup complete.")
+```
+
+### 2. Fetching Weather Data
+The `get_weather_data()` function connects to the OpenWeatherMap API to retrieve the current weather status and temperature for a specified location.
+
+```python
+def get_weather_data(place='Helsingborg,SE'):
+    """Fetches weather data from OWM."""
+    try:
+        owm = OWM(api_key)
+        mgr = owm.weather_manager()
+
+        # Current weather in Helsingborg
+        observation = mgr.weather_at_place(place)
+        w = observation.weather
+
+        status = w.detailed_status
+        temperature = w.temperature('celsius')
+        timestamp = datetime.datetime.now().isoformat()
+        
+        logging.info(f"Successfully fetched weather data for {place}.")
+        return (timestamp, status, temperature['temp'])
+    except Exception as e:
+        logging.error(f"Error fetching weather data: {e}")
+        return None
+```
+
+### 3. Storing Weather Data
+The `insert_weather()` function takes the fetched data and inserts it as a new record into the `hbg_weather` table.
+
+```python
+def insert_weather(data, db_file=DB_FILE):
+    """Inserts weather data into the database."""
+    if data is None:
+        logging.warning("No weather data to insert.")
+        return
+        
+    conn = sqlite3.connect(db_file)
+    cursor = conn.cursor()    
+     
+    sql_insert = '''
+        INSERT INTO hbg_weather (timestamp, status, temperature)
+        VALUES (?, ?, ?);
+    '''
+    try:
+        cursor.execute(sql_insert, data)
+        conn.commit()
+        logging.info("Data inserted successfully.")
+    except sqlite3.Error as e:
+        logging.error(f"Error inserting data: {e}")
+    finally:
+        conn.close()
+```
+
+### 4. Main Execution
+The `main()` function orchestrates the entire process, calling the other functions in sequence to set up the database, fetch the data, and insert it.
+
+```python
+def main():
+    """Main function to run the script."""
+    setup_database()
+    # Get the latest weather data and insert it into the database
+    weather_data_to_insert = get_weather_data()
+    insert_weather(weather_data_to_insert)
+
+if __name__ == "__main__":
+    main()
+```
 
 ## Automation with Windows Task Scheduler
 
