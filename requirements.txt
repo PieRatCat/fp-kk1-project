@@ -1,0 +1,4 @@
+pyowm
+python-dotenv
+pytest
+pytest-mock
