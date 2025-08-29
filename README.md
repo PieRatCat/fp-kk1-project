@@ -38,17 +38,8 @@ fp-kk1-project/
 ├── weatherdata.db            # SQLite database file
 ├── .env                      # Environment variables (for API key)
 │
-├── logs/
-│   └── app.log               # Log file for the application
-│
-└── images/
-    ├── Screenshot_action.png
-    ├── Screenshot_db_structure.png
-    ├── Screenshot_edit_action.png
-    ├── Screenshot_edit_trigger.png
-    ├── Screenshot_log.png
-    ├── Screenshot_table.png
-    └── Screenshot_trigger.png
+└── logs/
+    └── app.log               # Log file for the application
 ```
 
 ## Setup and Installation
@@ -59,7 +50,7 @@ fp-kk1-project/
     cd fp-kk1-project
     ```
 
-2.  **Create a virtual environment:**
+2.  **Create and activate a virtual environment:**
     ```bash
     python -m venv venv
     venv\Scripts\activate
