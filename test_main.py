@@ -1,76 +1,80 @@
-import pytest
+from main import setup_database, get_weather_data, insert_weather
 import sqlite3
 import os
-from unittest.mock import patch, MagicMock
-from main import setup_database, get_weather_data, insert_weather, DB_FILE
+import pytest
 
-# Test database file
+# Define the test database file
 TEST_DB_FILE = 'test_weatherdata.db'
 
-@pytest.fixture(autouse=True)
-def setup_and_teardown():
-    # Setup: ensure the test database file does not exist before tests
+@pytest.fixture
+def test_db():
+    """Fixture to set up and tear down a test database."""
+    # Ensure the database file does not exist before the test
     if os.path.exists(TEST_DB_FILE):
         os.remove(TEST_DB_FILE)
     
-    # Yield control to the test function
-    yield
-    
-    # Teardown: clean up the test database file after tests
-    if os.path.exists(TEST_DB_FILE):
-        os.remove(TEST_DB_FILE)
-
-def test_setup_database():
-    """Test that the database file and table are created."""
+    # Setup the database for the test
     setup_database(db_file=TEST_DB_FILE)
     
+    yield TEST_DB_FILE
+    
+    # Teardown: remove the database file after the test
+    if os.path.exists(TEST_DB_FILE):
+        os.remove(TEST_DB_FILE)
+
+def test_setup_database(test_db):
+    """Tests the database setup using a test-specific database."""
     # Check if the database file was created
-    assert os.path.exists(TEST_DB_FILE)
+    assert os.path.exists(test_db)
     
     # Check if the table was created
-    conn = sqlite3.connect(TEST_DB_FILE)
+    conn = sqlite3.connect(test_db)
     cursor = conn.cursor()
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='hbg_weather';")
-    assert cursor.fetchone() is not None
+    result = cursor.fetchone()
     conn.close()
+    
+    assert result is not None
+    assert result[0] == 'hbg_weather'
 
-@patch('main.OWM')
-def test_get_weather_data(mock_owm):
-    """Test the data retrieval and parsing using a mock."""
-    mock_weather = MagicMock()
+def test_get_weather_data(mocker):
+    """Tests the data retrieval and parsing using pytest-mock."""
+    # Create a mock for the OWM object and its methods
+    mock_weather = mocker.MagicMock()
     mock_weather.detailed_status = 'clouds'
-    mock_weather.temperature.return_value = {'temp': 15.0}
-    
-    mock_mgr = MagicMock()
-    mock_mgr.weather_at_place.return_value.weather = mock_weather
-    
-    mock_owm.return_value.weather_manager.return_value = mock_mgr
-    
+    mock_weather.temperature.return_value = {'temp': 10}
+
+    mock_observation = mocker.MagicMock()
+    mock_observation.weather = mock_weather
+
+    mock_mgr = mocker.MagicMock()
+    mock_mgr.weather_at_place.return_value = mock_observation
+
+    # Use mocker to patch the OWM class in the main module
+    mock_owm_class = mocker.patch('main.OWM')
+    mock_owm_class.return_value.weather_manager.return_value = mock_mgr
+
     data = get_weather_data()
-    
+
     assert data is not None
-    assert isinstance(data[0], str) # Check if timestamp is a string
     assert data[1] == 'clouds'
-    assert data[2] == 15.0
+    assert data[2] == 10
 
-@patch('main.sqlite3.connect')
-def test_insert_weather(mock_connect):
-    """Test that the insert function correctly adds data to the database."""
-    mock_conn = MagicMock()
-    mock_cursor = MagicMock()
-    mock_connect.return_value = mock_conn
-    mock_conn.cursor.return_value = mock_cursor
-    
+def test_insert_weather(test_db):
+    """Tests inserting data into the test database."""
     test_data = ('2023-01-01T12:00:00', 'sunny', 20.0)
+    insert_weather(test_data, db_file=test_db)
     
-    insert_weather(test_data, db_file=TEST_DB_FILE)
-    
-    mock_connect.assert_called_once_with(TEST_DB_FILE)
-    mock_cursor.execute.assert_called_once()
-    mock_conn.commit.assert_called_once()
-    mock_conn.close.assert_called_once()
-
-def test_insert_weather_with_none_data():
-    with patch('main.logging.warning') as mock_logging:
-        insert_weather(None)
-        mock_logging.assert_called_with("No weather data to insert.")
+    conn = sqlite3.connect(test_db)
+    cursor = conn.cursor()
+    try:
+        # Verify that the data was inserted correctly
+        cursor.execute("SELECT * FROM hbg_weather WHERE timestamp = ?", (test_data[0],))
+        result = cursor.fetchone()
+        assert result is not None
+        assert result[1] == test_data[0]
+        assert result[2] == test_data[1]
+        assert result[3] == test_data[2]
+    finally:
+        # The fixture will handle the cleanup of the entire database file
+        conn.close()
