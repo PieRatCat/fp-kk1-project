@@ -2,6 +2,23 @@
 
 This project is a Python script that fetches weather data from the OpenWeatherMap (OWM) API using the [pyowm](https://github.com/csparpa/pyowm) library, stores it in a SQLite database, and is scheduled to run automatically.
 
+## Table of Contents
+
+- [Features](#features)
+- [Project Structure](#project-structure)
+- [Setup and Installation](#setup-and-installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [How It Works](#how-it-works)
+  - [Database Setup](#1-database-setup)
+  - [Fetching Weather Data](#2-fetching-weather-data)
+  - [Storing Weather Data](#3-storing-weather-data)
+  - [Main Execution](#4-main-execution)
+- [Automation with Windows Task Scheduler](#automation-with-windows-task-scheduler)
+- [Database](#database)
+- [Logging](#logging)
+- [Testing](#testing)
+
 ## Features
 
 - Fetches current weather data (status and temperature) for a specified location.
@@ -38,7 +55,7 @@ fp-kk1-project/
 
 1.  **Clone the repository:**
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/PieRatCat/fp-kk1-project.git
     cd fp-kk1-project
     ```
 
@@ -49,6 +66,13 @@ fp-kk1-project/
     ```
 
 3.  **Install the dependencies:**
+    The project requires the following Python packages:
+    - `pyowm`
+    - `python-dotenv`
+    - `pytest`
+    - `pytest-mock`
+
+    You can install them all using the `requirements.txt` file:
     ```bash
     pip install -r requirements.txt
     ```
@@ -207,10 +231,8 @@ The script logs its operations to `logs/app.log`. This includes information abou
 
 ## Testing
 
-The project includes a suite of tests written with `pytest`. To run the tests, execute the following command:
-
-```bash
-pytest
-```
+The project includes a suite of tests written with `pytest`.
 
 The tests cover the database setup, API data fetching (using mocks), and data insertion logic.
+
+![Test Output](images/Screenshot_test.png)

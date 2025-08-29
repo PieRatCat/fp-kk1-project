@@ -52,3 +52,6 @@
 2025-08-29 11:10:02,422 - INFO - Database setup complete.
 2025-08-29 11:10:02,569 - INFO - Successfully fetched weather data for Helsingborg,SE.
 2025-08-29 11:10:02,606 - INFO - Data inserted successfully.
+2025-08-29 12:10:02,348 - INFO - Database setup complete.
+2025-08-29 12:10:02,500 - INFO - Successfully fetched weather data for Helsingborg,SE.
+2025-08-29 12:10:02,556 - INFO - Data inserted successfully.
